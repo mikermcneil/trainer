@@ -1,7 +1,7 @@
 {
   "name": "trainer",
   "author": "Mike McNeil <@mikermcneil>",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Get your Pokemons' IVs from Pokemon Go based on screenshots from your phone or tablet.",
   "homepage": "http://mikermcneil.com",
   "keywords": [
