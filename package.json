@@ -1,0 +1,46 @@
+{
+  "name": "trainer",
+  "author": "Mike McNeil <@mikermcneil>",
+  "version": "0.1.0",
+  "description": "Get your Pokemons' IVs based on screenshots from your phone or tablet.",
+  "homepage": "http://mikermcneil.com",
+  "keywords": [
+    "pokemon",
+    "pokemon-go",
+    "pogo",
+    "ocr",
+    "machine",
+    "node-machine"
+  ],
+  "bin": {
+    "trainer": "./bin/trainer.js",
+    "trainer-ivs": "./bin/ivs.js"
+  },
+  "scripts": {
+    "test": "mocha -b",
+    "prepublish": "npm prune",
+    "preinstall": "node ./lib/preinstall_npmcheck.js"
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "dependencies": {
+    "lwip": "0.0.9",
+    "chalk": "1.1.0",
+    "commander": "2.8.1",
+    "lodash": "3.10.1",
+    "machine-as-script": "^4.0.1",
+    "machinepack-ocr": "^1.0.2",
+    "machinepack-process": "^2.0.2"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mikermcneil/trainer.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">= 0.10.0",
+    "npm": ">= 2.0.0"
+  }
+}
