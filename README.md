@@ -39,7 +39,7 @@ You can find installation instructions for various platforms on [the Tesseract p
 ### Usage
 
 ```bash
-trainer ivs ./squirtle.png
+∑ trainer ivs ./squirtle.png
 ```
 
 
@@ -48,18 +48,18 @@ trainer ivs ./squirtle.png
 > This is a work in progress!
 
 ```
-trainer ivs krabby.png
-x0: 413 x1: 523 y0: 1045 y1: 1100
-raw stardustToPowerUp: 1600
-
+∑ trainer ivs krabby.png
 
 IVs:
 
 • CP 266
 
+• Max HP 33
+
 • Stardust to power up 1600
 
-• rawTextFromInitialPass:
+
+• Raw text:
 
 Dungeness
 
