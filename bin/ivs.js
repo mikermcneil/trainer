@@ -2,6 +2,9 @@
 require('machine-as-script')({
 
 
+  args: ['path'],
+
+
   friendlyName: 'Get individual values (IVs)',
 
 
@@ -114,19 +117,70 @@ require('machine-as-script')({
                     cp = cp.replace(/[^0-9]/g,'');
                     cp = +cp;
 
-                    // --•
-                    // Some text was recognized successfully!
-                    return exits.success({
-                      rawTextFromInitialPass: rawTextFromInitialPass,
-                      cp: cp
-                    });
-                  } catch (e) { return exits.error(e); }
-                });//</OCR.recognize()>
 
+                    //  ███████╗████████╗ █████╗ ██████╗ ██████╗ ██╗   ██╗███████╗████████╗    ████████╗ ██████╗
+                    //  ██╔════╝╚══██╔══╝██╔══██╗██╔══██╗██╔══██╗██║   ██║██╔════╝╚══██╔══╝    ╚══██╔══╝██╔═══██╗
+                    //  ███████╗   ██║   ███████║██████╔╝██║  ██║██║   ██║███████╗   ██║          ██║   ██║   ██║
+                    //  ╚════██║   ██║   ██╔══██║██╔══██╗██║  ██║██║   ██║╚════██║   ██║          ██║   ██║   ██║
+                    //  ███████║   ██║   ██║  ██║██║  ██║██████╔╝╚██████╔╝███████║   ██║          ██║   ╚██████╔╝
+                    //  ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝  ╚═════╝ ╚══════╝   ╚═╝          ╚═╝    ╚═════╝
+                    //
+                    //  ██████╗  ██████╗ ██╗    ██╗███████╗██████╗     ██╗   ██╗██████╗
+                    //  ██╔══██╗██╔═══██╗██║    ██║██╔════╝██╔══██╗    ██║   ██║██╔══██╗
+                    //  ██████╔╝██║   ██║██║ █╗ ██║█████╗  ██████╔╝    ██║   ██║██████╔╝
+                    //  ██╔═══╝ ██║   ██║██║███╗██║██╔══╝  ██╔══██╗    ██║   ██║██╔═══╝
+                    //  ██║     ╚██████╔╝╚███╔███╔╝███████╗██║  ██║    ╚██████╔╝██║
+                    //  ╚═╝      ╚═════╝  ╚══╝╚══╝ ╚══════╝╚═╝  ╚═╝     ╚═════╝ ╚═╝
+                    //
+                    LWIP.open(inputs.path, function (err, image){
+                      if (err) { return exits.error(err); }
+                      // var tmpStardustToPowerUpImg = path.resolve(os.tmpDir(), path.basename(inputs.path)+'-stardust-to-power-up.crop.jpg');
+                      var tmpStardustToPowerUpImg = path.resolve('/Users/mikermcneil/Desktop', path.basename(inputs.path)+'-stardust-to-power-up.crop.jpg');
+                      // console.log('tmpStardustToPowerUpImg',tmpStardustToPowerUpImg);
+
+                      // Build dimensions.
+                      var x0 = 413;
+                      var x1 = 523;
+                      var y0 = 1045;
+                      var y1 = 1100;
+                      console.log('x0:',x0, 'x1:',x1, 'y0:',y0, 'y1:',y1);
+
+                      // Do the cropping
+                      image.batch()
+                      .crop(x0, y0, x1, y1)
+                      .writeFile(tmpStardustToPowerUpImg, function (err){
+                        try {
+                          if (err) { return exits.error(err); }
+
+                          // Now do another pass to get CP
+                          // (to experiment: `tesseract -psm 8 /Users/mikermcneil/Desktop/krabby.png-cp.crop.jpg foo`)
+                          OCR.recognize({ path: tmpStardustToPowerUpImg, psm: 8, convertToGrayscale: true }).exec(function (err, stardustToPowerUp) {
+                            try {
+                              if (err) { return exits.error(err); }
+
+                              console.log('raw stardustToPowerUp:',stardustToPowerUp);
+                              stardustToPowerUp = stardustToPowerUp.replace(/[^0-9]/g,'');
+                              stardustToPowerUp = +stardustToPowerUp;
+
+                              // --•
+                              // Some text was recognized successfully!
+                              return exits.success({
+                                rawTextFromInitialPass: rawTextFromInitialPass,
+                                cp: cp,
+                                stardustToPowerUp: stardustToPowerUp,
+                              });
+                            } catch (e) { return exits.error(e); }
+                          });//</OCR.recognize() :: stardust to power up>
+                        } catch (e) { return exits.error(e); }
+                      });//</image.batch() (for stardust to power up)>
+                    });//</LWIP.open() (for stardust to power up)>
+
+                  } catch (e) { return exits.error(e); }
+                });//</OCR.recognize() :: CP>
               } catch (e) { return exits.error(e); }
-            });//</OCR.recognize()>
+            });//</image.batch()>
           } catch (e) { return exits.error(e); }
-        });//</image.batch()>
+        });//</OCR.recognize() :: overall>
       } catch (e) { return exits.error(e); }
     });//</LWIP.open()>
 
@@ -136,7 +190,8 @@ require('machine-as-script')({
 }).exec({
   success: function (ivReport){
     console.log('IVs:');
-    console.log('\n• rawTextFromInitialPass:', ivReport.rawTextFromInitialPass);
     console.log('\n• CP', ivReport.cp);
+    console.log('\n• Stardust to power up', ivReport.stardustToPowerUp);
+    console.log('\n• rawTextFromInitialPass:', ivReport.rawTextFromInitialPass);
   }
 });

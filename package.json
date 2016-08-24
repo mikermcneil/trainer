@@ -28,7 +28,7 @@
     "commander": "2.8.1",
     "lodash": "3.10.1",
     "machine-as-script": "^4.0.1",
-    "machinepack-ocr": "^1.0.2",
+    "machinepack-ocr": "^1.1.0",
     "machinepack-process": "^2.0.2"
   },
   "devDependencies": {},
