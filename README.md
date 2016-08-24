@@ -1,6 +1,6 @@
 # trainer
 
-Get your Pokemons' IVs based on screenshots from your phone or tablet.
+Get your Pokemons' IVs from Pokemon Go based on screenshots from your phone or tablet.
 
 > This is a work in progress, and is currently mainly just a showcase of what's possible with machinepacks and machine-as-script.
 > We'll see where it goes!
