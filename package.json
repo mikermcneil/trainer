@@ -17,9 +17,7 @@
     "trainer-ivs": "./bin/ivs.js"
   },
   "scripts": {
-    "test": "mocha -b",
-    "prepublish": "npm prune",
-    "preinstall": "node ./lib/preinstall_npmcheck.js"
+    "test": "mocha -b"
   },
   "directories": {
     "lib": "lib"

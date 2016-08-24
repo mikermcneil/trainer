@@ -31,7 +31,7 @@ require('machine-as-script')({
     success: {
       outputFriendlyName: 'IVs',
       outputDescription: 'A report on this Pokemon\'s individual values (IVs).',
-      outputExample: '===',// TODO
+      example: '===',// TODO
     },
 
   },
@@ -58,35 +58,70 @@ require('machine-as-script')({
       if (err) { return exits.error(err); }
       try {
 
-        // Figure out the appropriate path to a directory where the temporary image
-        // will be written.
-        var tmpPathForModifiedImg = path.resolve(os.tmpDir(), path.basename(inputs.path)+'-cp.crop.jpg');
-
-        // DEBUG
-        // --------------------------------------------------------------------------------------------------------------------
-        // var tmpPathForModifiedImg = path.resolve('/Users/mikermcneil/Desktop', path.basename(inputs.path)+'-grayscale.tmp.jpg');
-        // console.log('tmpPathForModifiedImg',tmpPathForModifiedImg);
-        // --------------------------------------------------------------------------------------------------------------------
-
-
-        // Make grayscale version of image.
-        image.batch()
-        // TODO: crop the CP part
-        .saturate(-1) // https://github.com/EyalAr/lwip#saturate (<< Desaturating definitely improves recog, at least somewhat)
-        // .darken(0.2) // https://github.com/EyalAr/lwip#darken (<< Darkening doesn't seem to make a difference.)
-        // .sharpen(0.2) // https://github.com/EyalAr/lwip#sharpen (<< Sharpening MIGHT actually hurt recog a bit..)
-        .writeFile(tmpPathForModifiedImg, function (err){
+        //   ██████╗ ██╗   ██╗███████╗██████╗  █████╗ ██╗     ██╗
+        //  ██╔═══██╗██║   ██║██╔════╝██╔══██╗██╔══██╗██║     ██║
+        //  ██║   ██║██║   ██║█████╗  ██████╔╝███████║██║     ██║
+        //  ██║   ██║╚██╗ ██╔╝██╔══╝  ██╔══██╗██╔══██║██║     ██║
+        //  ╚██████╔╝ ╚████╔╝ ███████╗██║  ██║██║  ██║███████╗███████╗
+        //   ╚═════╝   ╚═══╝  ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝
+        //
+        // Now attempt to recognize characters in the image.
+        OCR.recognize({ path: inputs.path, convertToGrayscale: true }).exec(function (err, rawTextFromInitialPass) {
           try {
             if (err) { return exits.error(err); }
 
-            // Now attempt to recognize characters in the image.
-            OCR.recognize({ path: tmpPathForModifiedImg }).exec(function (err, text) {
+            //   ██████╗██████╗
+            //  ██╔════╝██╔══██╗
+            //  ██║     ██████╔╝
+            //  ██║     ██╔═══╝
+            //  ╚██████╗██║
+            //   ╚═════╝╚═╝
+            //
+            // Crop the CP part of the image.
+            //
+            // Figure out the appropriate path to a directory where the temporary image
+            // will be written.
+            // var tmpCPImg = path.resolve(os.tmpDir(), path.basename(inputs.path)+'-cp.crop.jpg');
+
+            // DEBUG
+            // --------------------------------------------------------------------------------------------------------------------
+            var tmpCPImg = path.resolve('/Users/mikermcneil/Desktop', path.basename(inputs.path)+'-cp.crop.jpg');
+            // console.log('tmpCPImg',tmpCPImg);
+            // --------------------------------------------------------------------------------------------------------------------
+
+            // Build dimensions.
+            var cpCropWidth = image.width() * 0.33;
+            var x0 = (image.width() / 2) - (cpCropWidth / 2);
+            var x1 = (image.width() / 2) + (cpCropWidth / 2);
+            var y0 = 75;
+            var y1 = 155;
+            // console.log('x0:',x0, 'x1:',x1, 'y0:',y0, 'y1:',y1, 'cpCropWidth:',cpCropWidth);
+
+            // Do the cropping
+            image.batch()
+            .crop(x0, y0, x1, y1)
+            .writeFile(tmpCPImg, function (err){
               try {
                 if (err) { return exits.error(err); }
 
-                // --•
-                // Some text was recognized successfully!
-                return exits.success(text);
+                // Now do another pass to get CP
+                // (to experiment: `tesseract -psm 8 /Users/mikermcneil/Desktop/krabby.png-cp.crop.jpg foo`)
+                OCR.recognize({ path: tmpCPImg, psm: 8 }).exec(function (err, cp) {
+                  try {
+                    if (err) { return exits.error(err); }
+
+                    // console.log('raw cp:',cp);
+                    cp = cp.replace(/[^0-9]/g,'');
+                    cp = +cp;
+
+                    // --•
+                    // Some text was recognized successfully!
+                    return exits.success({
+                      rawTextFromInitialPass: rawTextFromInitialPass,
+                      cp: cp
+                    });
+                  } catch (e) { return exits.error(e); }
+                });//</OCR.recognize()>
 
               } catch (e) { return exits.error(e); }
             });//</OCR.recognize()>
@@ -98,4 +133,10 @@ require('machine-as-script')({
   }
 
 
-}).exec();
+}).exec({
+  success: function (ivReport){
+    console.log('IVs:');
+    console.log('\n• rawTextFromInitialPass:', ivReport.rawTextFromInitialPass);
+    console.log('\n• CP', ivReport.cp);
+  }
+});
