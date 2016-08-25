@@ -204,33 +204,58 @@ require('machine-as-script')({
                                           try {
                                             if (err) { return exits.error(err); }
 
-                                            // Formula
-                                            // - - - - - - - - - - - - - - - - - - - - -
-                                            // y = (mx + (w/2))^2 + y0;
-                                            //
-                                            // m: device-specific arc fatness multiplier
-                                            // x: x position along arc
-                                            // w: device width (px)
-                                            // y0: topmost y coordinate of arc
-                                            // - - - - - - - - - - - - - - - - - - - - -
 
-                                            var m = 0.048;
+                                            // Device-specific constants:
+                                            // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+                                            // width of image in px
                                             var w = image.width();
-                                            var y0 = 175;
-                                            var xPadding = 75; // << # of padding px on both left + right side of arc
+                                            // # of padding px on both left + right side of arc
+                                            var xPadding = 75;
+                                            // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+                                            // Formula
                                             var arcFx = function (x){
+
+                                              var y0 = 175;
+
+                                              // Original parabola approach: (not quite right)
+                                              // - - - - - - - - - - - - - - - - - - - - -
+                                              // y = (mx + (w/2))^2 + y0;
+                                              //
+                                              // m: device-specific arc fatness multiplier
+                                              // x: x position along arc
+                                              // w: device width (px)
+                                              // y0: topmost y coordinate of arc
+                                              // - - - - - - - - - - - - - - - - - - - - -
+                                              var m = 0.048;
                                               return (Math.pow(m*(x - w/2.0), 2)) + y0;
+
+                                              // // Instead, we use a circle:
+                                              // var diameter = w - (xPadding*2);
+                                              // var radius = diameter / 2;
+
+                                              // // Beginning with standard form Pythagoras circle:
+                                              // // (x-a)^2 + (y-b)^2 === radius^2
+                                              // // <=>
+                                              // // √( (y-b)^2) ) === √( radius^2 - (x-a)^2 )
+                                              // // <=>
+                                              // // y-b === ±√( radius^2 - (x-a)^2 )
+                                              // // <=>
+                                              // // y === b ± √( radius^2 - (x-a)^2 )
+
+                                              // var A = 0;
+                                              // var B = 0;
+                                              // return B + Math.sqrt( Math.pow(radius,2) - Math.pow(x-A, 2) );
                                             };
 
-                                            console.log('m: %d, w: %d, y0: %d', m, w, y0);
-                                            for (var x = xPadding; x < (w - xPadding); x++) {
-                                              var y = Math.floor(arcFx(x));
-                                              console.log('(%d,%d)',x,y);
-                                              var pixel = image.getPixel(x, y);
-                                              console.log('=pixel:',pixel);
-                                            }
-                                            // TODO: finish
+                                            // console.log('m: %d, w: %d, y0: %d', m, w, y0);
+                                            // for (var x = xPadding; x < (w - xPadding); x++) {
+                                            //   var y = Math.floor(arcFx(x));
+                                            //   console.log('(%d,%d)',x,y);
+                                            //   var pixel = image.getPixel(x, y);
+                                            //   console.log('=pixel:',pixel);
+                                            // }
+                                            // // TODO: finish
 
 
                                             // For debugging purposes, draw arc.
