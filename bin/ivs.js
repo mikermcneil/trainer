@@ -252,9 +252,17 @@ require('machine-as-script')({
                                               // // <=>
                                               // // y === b ± √( radius^2 - (x-a)^2 )
 
-                                              var A = 0;
-                                              var B = 0;
-                                              return B + Math.sqrt( Math.pow(radius,2) - Math.pow(x-A, 2) );
+                                              var A = w/2.0; // indicates the x origin of circle
+                                              var B = 475; // indicates the y origin of circle
+
+                                              // console.log('radius:',radius);
+                                              console.log('x:',x);
+                                              console.log('x-A:',x-A);
+                                              var result = B - Math.sqrt( Math.pow(radius,2) - Math.pow(x-A, 2) );
+                                              if (_.isNaN(result)) {
+                                                throw new Error(require('util').format('got NaN trying to compute √ of `%d`',(Math.pow(radius,2) - Math.pow(x-A, 2))));
+                                              }
+                                              return result;
                                             };
 
                                             // console.log('m: %d, w: %d, y0: %d', m, w, y0);
