@@ -248,7 +248,8 @@ require('machine-as-script')({
                                               var radius = diameter / 2;
 
                                               // Decrease the radius _JUST A HAIR_ so we'll be able to detect the white blob.
-                                              radius -= 3;
+                                              radius -= 2;
+                                              // radius -= 2;
                                               // console.log('radius:',radius);
 
                                               // // Beginning with standard form Pythagoras circle:
@@ -278,11 +279,11 @@ require('machine-as-script')({
 
 
                                             var arcNoduleFoundAtX;
-                                            for (var x = xPadding; x <= maxX; x++) {
+                                            for (var x = xPadding; x <= maxX; x+=0.5) {
                                               var y = Math.floor(arcFx(x));
-                                              // console.log('(%d,%d)',x,y);
-                                              var pixel = image.getPixel(x, y);
-                                              // console.log('=pixel:',pixel);
+                                              console.log('(%d,%d)',x,y);
+                                              var pixel = image.getPixel(Math.floor(x), y);
+                                              console.log('=pixel:',pixel);
 
                                               var WHITENESS_THRESHOLD = 240;
                                               if (pixel.r >= WHITENESS_THRESHOLD && pixel.g >= WHITENESS_THRESHOLD && pixel.b >= WHITENESS_THRESHOLD) {
@@ -299,13 +300,13 @@ require('machine-as-script')({
                                             // console.log('arcNoduleFoundAtX', arcNoduleFoundAtX);
 
                                             var approximationOfPokeArcPercent = (arcNoduleFoundAtX / maxX) * 100;
-                                            // console.log('approximationOfPokeArcPercent', approximationOfPokeArcPercent);
+                                            console.log('approximationOfPokeArcPercent', approximationOfPokeArcPercent);
 
                                             // distance between (xPadding, arcFx(xPadding)) and (arcNoduleFoundAtX, arcFx(arcNoduleFoundAtX))
                                             // http://www.mathwarehouse.com/algebra/distance_formula/index.php
                                             // √( (x2-x1)^2 + (y2-y1)^2 )
                                             var distance = Math.sqrt( Math.pow(arcNoduleFoundAtX - xPadding, 2) + Math.pow(arcFx(arcNoduleFoundAtX) - arcFx(xPadding), 2) );
-                                            // console.log('distance', distance);
+                                            console.log('distance', distance);
 
 
 
@@ -314,15 +315,15 @@ require('machine-as-script')({
                                             var angle = Math.acos(
                                               ( Math.pow(diameter/2.0,2) + Math.pow(diameter/2.0,2) - Math.pow(distance,2) ) / ( 2*(diameter/2.0)*(diameter/2.0) )
                                             );
-                                            // console.log('angle', angle);
+                                            console.log('angle', angle);
 
                                             var circumference = diameter * Math.PI;
-                                            // console.log('circumference', circumference);
+                                            console.log('circumference', circumference);
                                             var maxAngle = Math.PI * 2; // (2π radians / 360 degrees)
                                             var angleRatio = angle / maxAngle;
-                                            // console.log('angleRatio (out of 2π radians)', angleRatio);
+                                            console.log('angleRatio (out of 2π radians)', angleRatio);
                                             var arcLength = circumference * angleRatio;
-                                            // console.log('arcLength', arcLength);
+                                            console.log('arcLength', arcLength);
 
                                             // // Need to calculate circumference sort of a thing.
                                             var halfTheCircumference = circumference / 2.0;
@@ -331,25 +332,25 @@ require('machine-as-script')({
 
 
 
-                                            // // For debugging purposes, draw arc.
-                                            // // ------------------------------------------------
-                                            // (function _drawArcForDebug(){
-                                            //   var batch = image.batch();
+                                            // For debugging purposes, draw arc.
+                                            // ------------------------------------------------
+                                            (function _drawArcForDebug(){
+                                              var batch = image.batch();
 
-                                            //   for (var x = xPadding; x <= maxX; x++) {
-                                            //     var y = Math.floor(arcFx(x));
-                                            //     batch = batch.setPixel(x, y, 'black');
-                                            //   }
+                                              for (var x = xPadding; x <= maxX; x+=0.5) {
+                                                var y = Math.floor(arcFx(x));
+                                                batch = batch.setPixel(Math.floor(x), y, 'black');
+                                              }
 
-                                            //   var debugImgPath = path.resolve('/Users/mikermcneil/Desktop', path.basename(inputs.path)+'-debug.jpg');
-                                            //   batch.writeFile(debugImgPath, function (err){
-                                            //     if (err) { console.error('FAILED to write debug img.  Details:',err); }
-                                            //     console.log('Successfully wrote debug img at '+debugImgPath);
-                                            //   });
-                                            //   // _∏_
+                                              var debugImgPath = path.resolve('/Users/mikermcneil/Desktop', path.basename(inputs.path)+'-debug.jpg');
+                                              batch.writeFile(debugImgPath, function (err){
+                                                if (err) { console.error('FAILED to write debug img.  Details:',err); }
+                                                console.log('Successfully wrote debug img at '+debugImgPath);
+                                              });
+                                              // _∏_
 
-                                            // })();//</self-calling function :: _drawArcForDebug()>
-                                            // // ------------------------------------------------
+                                            })();//</self-calling function :: _drawArcForDebug()>
+                                            // ------------------------------------------------
 
 
                                             // --•
@@ -391,7 +392,7 @@ require('machine-as-script')({
     console.log('\n• CP', ivReport.cp);
     console.log('\n• Max HP', ivReport.maxHP);
     console.log('\n• Dust cost (stardust to power up)', ivReport.stardustToPowerUp);
-    console.log('\n• Pokemon Lvl Arc %', ivReport.pokeArcPercent);
+    console.log('\n• Pokemon Lvl Arc %', Math.round(ivReport.pokeArcPercent));
     // console.log('\n• rawTextFromInitialPass:', ivReport.rawTextFromInitialPass);
   }
 });
