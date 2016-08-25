@@ -119,19 +119,12 @@ require('machine-as-script')({
                     cp = +cp;
 
 
-                    //  ███████╗████████╗ █████╗ ██████╗ ██████╗ ██╗   ██╗███████╗████████╗    ████████╗ ██████╗
-                    //  ██╔════╝╚══██╔══╝██╔══██╗██╔══██╗██╔══██╗██║   ██║██╔════╝╚══██╔══╝    ╚══██╔══╝██╔═══██╗
-                    //  ███████╗   ██║   ███████║██████╔╝██║  ██║██║   ██║███████╗   ██║          ██║   ██║   ██║
-                    //  ╚════██║   ██║   ██╔══██║██╔══██╗██║  ██║██║   ██║╚════██║   ██║          ██║   ██║   ██║
-                    //  ███████║   ██║   ██║  ██║██║  ██║██████╔╝╚██████╔╝███████║   ██║          ██║   ╚██████╔╝
-                    //  ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝  ╚═════╝ ╚══════╝   ╚═╝          ╚═╝    ╚═════╝
-                    //
-                    //  ██████╗  ██████╗ ██╗    ██╗███████╗██████╗     ██╗   ██╗██████╗
-                    //  ██╔══██╗██╔═══██╗██║    ██║██╔════╝██╔══██╗    ██║   ██║██╔══██╗
-                    //  ██████╔╝██║   ██║██║ █╗ ██║█████╗  ██████╔╝    ██║   ██║██████╔╝
-                    //  ██╔═══╝ ██║   ██║██║███╗██║██╔══╝  ██╔══██╗    ██║   ██║██╔═══╝
-                    //  ██║     ╚██████╔╝╚███╔███╔╝███████╗██║  ██║    ╚██████╔╝██║
-                    //  ╚═╝      ╚═════╝  ╚══╝╚══╝ ╚══════╝╚═╝  ╚═╝     ╚═════╝ ╚═╝
+                    //  ██████╗ ██╗   ██╗███████╗████████╗    ██████╗ ██████╗ ██╗ ██████╗███████╗
+                    //  ██╔══██╗██║   ██║██╔════╝╚══██╔══╝    ██╔══██╗██╔══██╗██║██╔════╝██╔════╝
+                    //  ██║  ██║██║   ██║███████╗   ██║       ██████╔╝██████╔╝██║██║     █████╗
+                    //  ██║  ██║██║   ██║╚════██║   ██║       ██╔═══╝ ██╔══██╗██║██║     ██╔══╝
+                    //  ██████╔╝╚██████╔╝███████║   ██║       ██║     ██║  ██║██║╚██████╗███████╗
+                    //  ╚═════╝  ╚═════╝ ╚══════╝   ╚═╝       ╚═╝     ╚═╝  ╚═╝╚═╝ ╚═════╝╚══════╝
                     //
                     LWIP.open(inputs.path, function (err, image){
                       if (err) { return exits.error(err); }
@@ -199,15 +192,78 @@ require('machine-as-script')({
                                         maxHP = maxHP.replace(/[^0-9]/g,'');
                                         maxHP = +maxHP;
 
-                                        // --•
-                                        // Some text was recognized successfully!
-                                        return exits.success({
-                                          rawTextFromInitialPass: rawTextFromInitialPass,
-                                          cp: cp,
-                                          stardustToPowerUp: stardustToPowerUp,
-                                          maxHP: maxHP,
-                                        });
+                                        //  ██████╗  ██████╗ ██╗  ██╗███████╗     █████╗ ██████╗  ██████╗
+                                        //  ██╔══██╗██╔═══██╗██║ ██╔╝██╔════╝    ██╔══██╗██╔══██╗██╔════╝
+                                        //  ██████╔╝██║   ██║█████╔╝ █████╗      ███████║██████╔╝██║
+                                        //  ██╔═══╝ ██║   ██║██╔═██╗ ██╔══╝      ██╔══██║██╔══██╗██║
+                                        //  ██║     ╚██████╔╝██║  ██╗███████╗    ██║  ██║██║  ██║╚██████╗
+                                        //  ╚═╝      ╚═════╝ ╚═╝  ╚═╝╚══════╝    ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝
+                                        //
+                                        // Parse poke arc
+                                        LWIP.open(inputs.path, function (err, image){
+                                          try {
+                                            if (err) { return exits.error(err); }
 
+                                            // Formula
+                                            // - - - - - - - - - - - - - - - - - - - - -
+                                            // y = (mx + (w/2))^2 + y0;
+                                            //
+                                            // m: device-specific arc fatness multiplier
+                                            // x: x position along arc
+                                            // w: device width (px)
+                                            // y0: topmost y coordinate of arc
+                                            // - - - - - - - - - - - - - - - - - - - - -
+
+                                            var m = 0.048;
+                                            var w = image.width();
+                                            var y0 = 175;
+                                            var xPadding = 75; // << # of padding px on both left + right side of arc
+
+                                            var arcFx = function (x){
+                                              return (Math.pow(m*(x - w/2.0), 2)) + y0;
+                                            };
+
+                                            console.log('m: %d, w: %d, y0: %d', m, w, y0);
+                                            for (var x = xPadding; x < (w - xPadding); x++) {
+                                              var y = Math.floor(arcFx(x));
+                                              console.log('(%d,%d)',x,y);
+                                              var pixel = image.getPixel(x, y);
+                                              console.log('=pixel:',pixel);
+                                            }
+                                            // TODO: finish
+
+
+                                            // For debugging purposes, draw arc.
+                                            // ------------------------------------------------
+                                            (function _drawArcForDebug(){
+                                              var batch = image.batch();
+
+                                              for (var x = xPadding; x < (w - xPadding); x++) {
+                                                var y = Math.floor(arcFx(x));
+                                                batch = batch.setPixel(x, y, 'black');
+                                              }
+
+                                              var debugImgPath = path.resolve('/Users/mikermcneil/Desktop', path.basename(inputs.path)+'-debug.jpg');
+                                              batch.writeFile(debugImgPath, function (err){
+                                                if (err) { console.error('FAILED to write debug img.  Details:',err); }
+                                                console.log('Successfully wrote debug img at '+debugImgPath);
+                                              });
+                                              // _∏_
+
+                                            })();//</self-calling function :: _drawArcForDebug()>
+                                            // ------------------------------------------------
+
+
+                                            // --•
+                                            return exits.success({
+                                              rawTextFromInitialPass: rawTextFromInitialPass,
+                                              cp: cp,
+                                              stardustToPowerUp: stardustToPowerUp,
+                                              maxHP: maxHP,
+                                            });
+
+                                          } catch (e) { return exits.error(e); }
+                                        });//</LWIP.open() (for poke arc)>
                                       } catch (e) { return exits.error(e); }
                                     });//</OCR.recognize() :: max HP>
                                   } catch (e) { return exits.error(e); }
