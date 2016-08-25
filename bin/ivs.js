@@ -211,7 +211,12 @@ require('machine-as-script')({
                                             var w = image.width();
                                             // # of padding px on both left + right side of arc
                                             var xPadding = 75;
+                                            // The last X value to iterate over.
+                                            var maxX = (w - xPadding) - 1;
                                             // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+                                            // Diameter
+                                            var diameter = w - (xPadding*2);
 
                                             // Formula
                                             var arcFx = function (x){
@@ -240,7 +245,6 @@ require('machine-as-script')({
                                               // b: some kind of constant
                                               // radius: radius of circle
                                               // - - - - - - - - - - - - - - - - - - - - -
-                                              var diameter = w - (xPadding*2);
                                               var radius = diameter / 2;
 
                                               // Decrease the radius _JUST A HAIR_ so we'll be able to detect the white blob.
@@ -260,8 +264,8 @@ require('machine-as-script')({
                                               var B = 475; // indicates the y origin of circle
 
                                               // console.log('radius:',radius);
-                                              console.log('x:',x);
-                                              console.log('x-A:',x-A);
+                                              // console.log('x:',x);
+                                              // console.log('x-A:',x-A);
                                               var result = B - Math.sqrt( Math.abs( Math.pow(radius,2) - Math.pow(x-A, 2) ) );
 
                                               // var result = B - Math.sqrt( Math.pow(radius,2) - Math.pow(x-A, 2) );
@@ -272,35 +276,80 @@ require('machine-as-script')({
                                               return result;
                                             };
 
-                                            // console.log('m: %d, w: %d, y0: %d', m, w, y0);
-                                            // for (var x = xPadding; x < (w - xPadding); x++) {
-                                            //   var y = Math.floor(arcFx(x));
-                                            //   console.log('(%d,%d)',x,y);
-                                            //   var pixel = image.getPixel(x, y);
-                                            //   console.log('=pixel:',pixel);
-                                            // }
-                                            // // TODO: finish
 
+                                            var arcNoduleFoundAtX;
+                                            for (var x = xPadding; x <= maxX; x++) {
+                                              var y = Math.floor(arcFx(x));
+                                              console.log('(%d,%d)',x,y);
+                                              var pixel = image.getPixel(x, y);
+                                              console.log('=pixel:',pixel);
 
-                                            // For debugging purposes, draw arc.
-                                            // ------------------------------------------------
-                                            (function _drawArcForDebug(){
-                                              var batch = image.batch();
-
-                                              for (var x = xPadding; x < (w - xPadding); x++) {
-                                                var y = Math.floor(arcFx(x));
-                                                batch = batch.setPixel(x, y, 'black');
+                                              var WHITENESS_THRESHOLD = 240;
+                                              if (pixel.r >= WHITENESS_THRESHOLD && pixel.g >= WHITENESS_THRESHOLD && pixel.b >= WHITENESS_THRESHOLD) {
+                                                arcNoduleFoundAtX = x;
+                                                // For now, take the LAST one.
+                                                // break;
                                               }
+                                            }
 
-                                              var debugImgPath = path.resolve('/Users/mikermcneil/Desktop', path.basename(inputs.path)+'-debug.jpg');
-                                              batch.writeFile(debugImgPath, function (err){
-                                                if (err) { console.error('FAILED to write debug img.  Details:',err); }
-                                                console.log('Successfully wrote debug img at '+debugImgPath);
-                                              });
-                                              // _∏_
+                                            if (_.isUndefined(arcNoduleFoundAtX)) {
+                                              throw new Error('Could not detect poke arc position in this screenshot.');
+                                            }
 
-                                            })();//</self-calling function :: _drawArcForDebug()>
-                                            // ------------------------------------------------
+                                            // console.log('arcNoduleFoundAtX', arcNoduleFoundAtX);
+
+                                            var approximationOfPokeArcPercent = (arcNoduleFoundAtX / maxX) * 100;
+                                            console.log('approximationOfPokeArcPercent', approximationOfPokeArcPercent);
+
+                                            // distance between (xPadding, arcFx(xPadding)) and (arcNoduleFoundAtX, arcFx(arcNoduleFoundAtX))
+                                            // http://www.mathwarehouse.com/algebra/distance_formula/index.php
+                                            // √( (x2-x1)^2 + (y2-y1)^2 )
+                                            var distance = Math.sqrt( Math.pow(arcNoduleFoundAtX - xPadding, 2) + Math.pow(arcFx(arcNoduleFoundAtX) - arcFx(xPadding), 2) );
+                                            console.log('distance', distance);
+
+
+
+                                            // Math.acos((a^2 + b^2 − c^2) / (2ab))
+                                            // https://www.mathsisfun.com/algebra/trig-solving-sss-triangles.html
+                                            var angle = Math.acos(
+                                              ( Math.pow(diameter/2.0,2) + Math.pow(diameter/2.0,2) - Math.pow(distance,2) ) / ( 2*(diameter/2.0)*(diameter/2.0) )
+                                            );
+                                            console.log('angle', angle);
+
+                                            var circumference = diameter * Math.PI;
+                                            console.log('circumference', circumference);
+                                            var maxAngle = Math.PI * 2; // (2π radians / 360 degrees)
+                                            var angleRatio = angle / maxAngle;
+                                            console.log('angleRatio (out of 2π radians)', angleRatio);
+                                            var arcLength = circumference * angleRatio;
+                                            console.log('arcLength', arcLength);
+
+                                            // // Need to calculate circumference sort of a thing.
+                                            var halfTheCircumference = circumference / 2.0;
+                                            var arcLengthBeforeNodule = arcLength;
+                                            var pokeArcPercent = (arcLengthBeforeNodule / halfTheCircumference) * 100;
+
+
+
+                                            // // For debugging purposes, draw arc.
+                                            // // ------------------------------------------------
+                                            // (function _drawArcForDebug(){
+                                            //   var batch = image.batch();
+
+                                            //   for (var x = xPadding; x <= maxX; x++) {
+                                            //     var y = Math.floor(arcFx(x));
+                                            //     batch = batch.setPixel(x, y, 'black');
+                                            //   }
+
+                                            //   var debugImgPath = path.resolve('/Users/mikermcneil/Desktop', path.basename(inputs.path)+'-debug.jpg');
+                                            //   batch.writeFile(debugImgPath, function (err){
+                                            //     if (err) { console.error('FAILED to write debug img.  Details:',err); }
+                                            //     console.log('Successfully wrote debug img at '+debugImgPath);
+                                            //   });
+                                            //   // _∏_
+
+                                            // })();//</self-calling function :: _drawArcForDebug()>
+                                            // // ------------------------------------------------
 
 
                                             // --•
@@ -309,6 +358,7 @@ require('machine-as-script')({
                                               cp: cp,
                                               stardustToPowerUp: stardustToPowerUp,
                                               maxHP: maxHP,
+                                              pokeArcPercent: pokeArcPercent
                                             });
 
                                           } catch (e) { return exits.error(e); }
@@ -340,7 +390,8 @@ require('machine-as-script')({
     console.log('IVs:');
     console.log('\n• CP', ivReport.cp);
     console.log('\n• Max HP', ivReport.maxHP);
-    console.log('\n• Stardust to power up', ivReport.stardustToPowerUp);
+    console.log('\n• Dust cost (stardust to power up)', ivReport.stardustToPowerUp);
+    console.log('\n• Pokemon Lvl Arc %', ivReport.pokeArcPercent);
     // console.log('\n• rawTextFromInitialPass:', ivReport.rawTextFromInitialPass);
   }
 });
