@@ -227,12 +227,21 @@ require('machine-as-script')({
                                               // w: device width (px)
                                               // y0: topmost y coordinate of arc
                                               // - - - - - - - - - - - - - - - - - - - - -
-                                              var m = 0.048;
-                                              return (Math.pow(m*(x - w/2.0), 2)) + y0;
+                                              // var m = 0.048;
+                                              // return (Math.pow(m*(x - w/2.0), 2)) + y0;
 
-                                              // // Instead, we use a circle:
-                                              // var diameter = w - (xPadding*2);
-                                              // var radius = diameter / 2;
+
+                                              // Instead, we use a circle:
+                                              // - - - - - - - - - - - - - - - - - - - - -
+                                              // (x-a)^2 + (y-b)^2 === radius^2
+                                              //
+                                              // x: x position along arc
+                                              // a: some kind of constant
+                                              // b: some kind of constant
+                                              // radius: radius of circle
+                                              // - - - - - - - - - - - - - - - - - - - - -
+                                              var diameter = w - (xPadding*2);
+                                              var radius = diameter / 2;
 
                                               // // Beginning with standard form Pythagoras circle:
                                               // // (x-a)^2 + (y-b)^2 === radius^2
@@ -243,9 +252,9 @@ require('machine-as-script')({
                                               // // <=>
                                               // // y === b ± √( radius^2 - (x-a)^2 )
 
-                                              // var A = 0;
-                                              // var B = 0;
-                                              // return B + Math.sqrt( Math.pow(radius,2) - Math.pow(x-A, 2) );
+                                              var A = 0;
+                                              var B = 0;
+                                              return B + Math.sqrt( Math.pow(radius,2) - Math.pow(x-A, 2) );
                                             };
 
                                             // console.log('m: %d, w: %d, y0: %d', m, w, y0);
