@@ -280,9 +280,9 @@ require('machine-as-script')({
                                             var arcNoduleFoundAtX;
                                             for (var x = xPadding; x <= maxX; x++) {
                                               var y = Math.floor(arcFx(x));
-                                              console.log('(%d,%d)',x,y);
+                                              // console.log('(%d,%d)',x,y);
                                               var pixel = image.getPixel(x, y);
-                                              console.log('=pixel:',pixel);
+                                              // console.log('=pixel:',pixel);
 
                                               var WHITENESS_THRESHOLD = 240;
                                               if (pixel.r >= WHITENESS_THRESHOLD && pixel.g >= WHITENESS_THRESHOLD && pixel.b >= WHITENESS_THRESHOLD) {
@@ -299,13 +299,13 @@ require('machine-as-script')({
                                             // console.log('arcNoduleFoundAtX', arcNoduleFoundAtX);
 
                                             var approximationOfPokeArcPercent = (arcNoduleFoundAtX / maxX) * 100;
-                                            console.log('approximationOfPokeArcPercent', approximationOfPokeArcPercent);
+                                            // console.log('approximationOfPokeArcPercent', approximationOfPokeArcPercent);
 
                                             // distance between (xPadding, arcFx(xPadding)) and (arcNoduleFoundAtX, arcFx(arcNoduleFoundAtX))
                                             // http://www.mathwarehouse.com/algebra/distance_formula/index.php
                                             // √( (x2-x1)^2 + (y2-y1)^2 )
                                             var distance = Math.sqrt( Math.pow(arcNoduleFoundAtX - xPadding, 2) + Math.pow(arcFx(arcNoduleFoundAtX) - arcFx(xPadding), 2) );
-                                            console.log('distance', distance);
+                                            // console.log('distance', distance);
 
 
 
@@ -314,15 +314,15 @@ require('machine-as-script')({
                                             var angle = Math.acos(
                                               ( Math.pow(diameter/2.0,2) + Math.pow(diameter/2.0,2) - Math.pow(distance,2) ) / ( 2*(diameter/2.0)*(diameter/2.0) )
                                             );
-                                            console.log('angle', angle);
+                                            // console.log('angle', angle);
 
                                             var circumference = diameter * Math.PI;
-                                            console.log('circumference', circumference);
+                                            // console.log('circumference', circumference);
                                             var maxAngle = Math.PI * 2; // (2π radians / 360 degrees)
                                             var angleRatio = angle / maxAngle;
-                                            console.log('angleRatio (out of 2π radians)', angleRatio);
+                                            // console.log('angleRatio (out of 2π radians)', angleRatio);
                                             var arcLength = circumference * angleRatio;
-                                            console.log('arcLength', arcLength);
+                                            // console.log('arcLength', arcLength);
 
                                             // // Need to calculate circumference sort of a thing.
                                             var halfTheCircumference = circumference / 2.0;
