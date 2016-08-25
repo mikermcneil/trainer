@@ -243,6 +243,10 @@ require('machine-as-script')({
                                               var diameter = w - (xPadding*2);
                                               var radius = diameter / 2;
 
+                                              // Decrease the radius _JUST A HAIR_ so we'll be able to detect the white blob.
+                                              radius -= 3;
+                                              // console.log('radius:',radius);
+
                                               // // Beginning with standard form Pythagoras circle:
                                               // // (x-a)^2 + (y-b)^2 === radius^2
                                               // // <=>
@@ -258,10 +262,13 @@ require('machine-as-script')({
                                               // console.log('radius:',radius);
                                               console.log('x:',x);
                                               console.log('x-A:',x-A);
-                                              var result = B - Math.sqrt( Math.pow(radius,2) - Math.pow(x-A, 2) );
-                                              if (_.isNaN(result)) {
-                                                throw new Error(require('util').format('got NaN trying to compute √ of `%d`',(Math.pow(radius,2) - Math.pow(x-A, 2))));
-                                              }
+                                              var result = B - Math.sqrt( Math.abs( Math.pow(radius,2) - Math.pow(x-A, 2) ) );
+
+                                              // var result = B - Math.sqrt( Math.pow(radius,2) - Math.pow(x-A, 2) );
+                                              // if (_.isNaN(result)) {
+                                              //   throw new Error(require('util').format('at x=%d, got NaN trying to compute √ of `%d`',x,(Math.pow(radius,2) - Math.pow(x-A, 2))));
+                                              // }
+
                                               return result;
                                             };
 
